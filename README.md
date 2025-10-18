@@ -62,26 +62,9 @@ Async-Image-Processing1/
 2. Run `HelloApplication.java` using JavaFX-compatible IDE.
 3. Extend `ImageFilter` for custom processing effects.
 
-## Example Usage
-
-```java
-ImageProcessor processor = new ImageProcessor();
-processor.processImage(image, blockSize, new GreyScaleFilter(), canvasDrawer);
-```
-
 ## Extending the Project
 
 - Add new filters by implementing `ImageFilter`.
 - Support alternative IO by implementing `ImageReadInf`.
 - Refine concurrency by adjusting thread pool size in `ImageProcessor`.
 
-## License
-
-MIT
-
-***
-
-Feel free to copy and adapt this `README.md` as needed for your repository!
-
-[1](https://github.com/chinmayaisaisabarish/Async-Image-Processing1/tree/main/src/main)
-[2](https://github.com/chinmayaisaisabarish/Async-Image-Processing1/blob/main/src/main/java/com/image/imageprocessing/processor/ImageProcessor.java)
