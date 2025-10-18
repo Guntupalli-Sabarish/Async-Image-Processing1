@@ -29,7 +29,7 @@ Open PowerShell at the project root (the folder that contains `mvnw.cmd` and `po
 
 ```powershell
 # Make sure you're in the project directory
-Set-Location -Path 'E:\Thinkit Club\Async Image processor\imageProcessingJava'
+Set-Location -Path 
 
 # Use the Maven wrapper to run the JavaFX application
 .\mvnw.cmd clean javafx:run
