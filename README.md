@@ -1,6 +1,4 @@
-Here is a sample `README.md` for your Async-Image-Processing1 project, including project explanation and the actual structure:[1]
 
-***
 
 # Async-Image-Processing1
 
