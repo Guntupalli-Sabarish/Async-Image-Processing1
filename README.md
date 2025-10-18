@@ -1,6 +1,6 @@
 # Async Image Processor (Java)
 
-A small JavaFX-based image processing project. This README explains the repository layout, prerequisites, and how to build and run the application on Windows (PowerShell) using the included Maven wrapper.
+A JavaFX-based image processing project. This README explains the repository layout, prerequisites, and how to build and run the application on Windows (PowerShell) using the included Maven wrapper.
 
 ## Repository structure
 
