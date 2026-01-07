@@ -1,70 +1,176 @@
+# Async Image Processing
 
+A JavaFX application that processes images asynchronously using concurrent programming. The application splits images into small tiles, processes them in parallel using multiple threads, and displays the result progressively on a canvas.
 
-# Async-Image-Processing1
+## About
 
-An **asynchronous, high-performance Java/JavaFX image-processing application** designed for scalable pixel-level operations on ultra-high-resolution images using concurrency and parallel pipeline architectures.
+This project demonstrates concurrent image processing with JavaFX. It takes an input image, divides it into small tiles, applies a grayscale filter to each tile in parallel using a thread pool, and renders the results in real-time.
+
+**Key Concepts:**
+- Concurrent processing using Java ExecutorService
+- JavaFX for GUI and canvas rendering
+- Thread-safe rendering with producer-consumer pattern
+- Modular design with filter interfaces
 
 ## Features
 
-- **Concurrent processing:** Uses thread pools and futures for block-wise parallel image transformation.
-- **Modular design:** Easily add new filters, IO methods, and processing stages.
-- **Pixel-level operations:** Handles RGB-to-grayscale conversion and image splitting for distributed processing.
-- **JavaFX visualization:** Displays processed results in a responsive JavaFX GUI.
+- Load images (JPG, PNG, BMP, GIF)
+- Split images into 10×10 pixel tiles
+- Process tiles in parallel (100 worker threads)
+- Progressive real-time rendering
+- Grayscale conversion filter
 
 ## Project Structure
 
 ```
-Async-Image-Processing1/
-│
-├── pom.xml                       # Maven build file
-├── README.md                     # Project documentation
-├── src/
-│   └── main/
-│       └── java/
-│           └── com/
-│               └── image/
-│                   └── imageprocessing/
-│                       ├── filter/
-│                       │   ├── ImageFilter.java          # Filter interface
-│                       │   └── GreyScaleFilter.java      # Grayscale filter implementation
-│                       ├── image/
-│                       │   ├── ImageData.java            # Data model for images
-│                       │   └── DrawMultipleImagesOnCanvas.java  # Canvas drawing helper
-│                       ├── io/
-│                       │   ├── ImageReadInf.java         # Image IO interface
-│                       │   ├── FileImageIO.java          # File IO implementation
-│                       │   └── test.jpg                  # Sample image
-│                       ├── processor/
-│                       │   └── ImageProcessor.java       # Core processing class using concurrency
-│                       ├── HelloApplication.java         # JavaFX app entry point
-│                       └── module-info.java              # Java module configuration
+src/main/java/com/image/imageprocessing/
+├── HelloApplication.java          # Main JavaFX entry point
+├── filter/
+│   ├── ImageFilter.java          # Filter interface
+│   └── GreyScaleFilter.java      # Grayscale implementation
+├── image/
+│   ├── ImageData.java            # Tile data model
+│   └── DrawMultipleImagesOnCanvas.java  # Canvas renderer
+├── io/
+│   ├── ImageReadInf.java         # I/O interface
+│   └── FileImageIO.java          # File reader
+└── processor/
+    └── ImageProcessor.java       # Concurrent processing engine
 ```
 
-## Core Components
+## Prerequisites
 
-- **Filter Module:** `ImageFilter` (interface) and `GreyScaleFilter` provide pluggable transformation logic.
-- **Image Module:** `ImageData` represents blocks of images; `DrawMultipleImagesOnCanvas` displays processed segments.
-- **IO Module:** `ImageReadInf` and `FileImageIO` manage reading images from disk; supports extension for new sources.
-- **Processor Module:** `ImageProcessor` splits images into blocks, submits tasks to a thread pool, applies filters, and merges results asynchronously.
-- **Application Entry:** `HelloApplication` launches JavaFX UI for user interaction and result visualization.
-- **Config Files:** `pom.xml` provides dependencies; `module-info.java` handles Java module requirements.
-
-## How It Works
-
-1. **Load an image** (e.g., `test.jpg`) using the IO module.
-2. **Split the image** into blocks of size N × N using `ImageProcessor`.
-3. **Process blocks concurrently**: Each block is filtered in parallel via the defined filter(s).
-4. **Visualize results** by enqueueing processed blocks and displaying them using JavaFX canvas.
+- Java 17 or higher
+- Maven 3.6+
 
 ## Getting Started
 
-1. Clone the repo and import as a Maven project.
-2. Run `HelloApplication.java` using JavaFX-compatible IDE.
-3. Extend `ImageFilter` for custom processing effects.
+### 1. Clone the Repository
 
-## Extending the Project
+```bash
+git clone <repository-url>
+cd Async-Image-Processing1
+```
 
-- Add new filters by implementing `ImageFilter`.
-- Support alternative IO by implementing `ImageReadInf`.
-- Refine concurrency by adjusting thread pool size in `ImageProcessor`.
+### 2. Build the Project
 
+Using the Maven wrapper (recommended):
+```bash
+mvnw clean install
+```
+
+Or if you have Maven installed:
+```bash
+mvn clean install
+```
+
+### 3. Run the Application
+
+Using Maven wrapper:
+```bash
+mvnw javafx:run
+```
+
+Or with Maven:
+```bash
+mvn javafx:run
+```
+
+### 4. Use the Application
+
+1. When the application starts, a file chooser dialog will appear
+2. Select an image file (JPG, PNG, BMP, or GIF)
+3. Watch as the image is processed tile-by-tile and converted to grayscale
+4. Close the window when finished
+
+## How It Works
+
+1. **Image Loading**: User selects an image via file dialog
+2. **Tile Splitting**: Image is divided into 10×10 pixel tiles
+3. **Parallel Processing**: Each tile is submitted to a thread pool of 100 workers
+4. **Filter Application**: Grayscale filter is applied to each tile independently
+5. **Progressive Rendering**: Processed tiles are displayed as they complete using JavaFX AnimationTimer
+6. **Display**: Final grayscale image is rendered on the canvas
+
+## Technologies Used
+
+- **Java 17** - Core programming language with module system
+- **JavaFX 17.0.6** - GUI framework for user interface and canvas
+- **Maven** - Build tool and dependency management
+- **ExecutorService** - Java concurrency for thread pool management
+- **LinkedBlockingQueue** - Thread-safe queue for the producer-consumer pattern
+
+## Contributing
+
+Contributions are welcome! Here's how you can contribute to this project:
+
+### Steps to Contribute
+
+1. **Fork the repository**
+   - Click the 'Fork' button on GitHub
+
+2. **Clone your fork**
+   ```bash
+   git clone https://github.com/your-username/Async-Image-Processing1.git
+   cd Async-Image-Processing1
+   ```
+
+3. **Create a new branch**
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+4. **Make your changes**
+   - Write clean, readable code
+   - Follow existing code style
+   - Test your changes
+
+5. **Commit your changes**
+   ```bash
+   git add .
+   git commit -m "Add: brief description of your changes"
+   ```
+
+6. **Push to your fork**
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+7. **Create a Pull Request**
+   - Go to the original repository on GitHub
+   - Click "New Pull Request"
+   - Select your fork and branch
+   - Provide a clear description of your changes
+
+### Contribution Ideas
+
+Here are some ways you can contribute:
+
+- **Add new image filters** (blur, sharpen, sepia, edge detection)
+- **Implement save functionality** to export processed images
+- **Improve performance** (optimize thread pool size, adaptive tiling)
+- **Add UI controls** (progress bar, filter selection dropdown)
+- **Write unit tests** for filters and core components
+- **Improve error handling** and user feedback
+- **Add documentation** and code comments
+- **Fix bugs** reported in issues
+
+### Code Guidelines
+
+- Use meaningful variable and method names
+- Follow Java naming conventions (camelCase for methods, PascalCase for classes)
+- Add comments for complex logic
+- Keep methods small and focused
+- Handle exceptions appropriately
+
+## License
+
+This project is available for educational and personal use.
+
+## Contact
+
+For questions, suggestions, or issues, please open an issue on GitHub.
+
+---
+
+Made with Java and JavaFX ☕
