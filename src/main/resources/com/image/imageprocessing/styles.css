@@ -1,0 +1,155 @@
+/* ============================================================
+   Async Image Processor – Dark UI Theme
+   ============================================================ */
+
+.root {
+    -fx-background-color: #1a1a2e;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-font-size: 13px;
+}
+
+/* ---- Toolbar ------------------------------------------------ */
+#toolbar {
+    -fx-background-color: #16213e;
+    -fx-padding: 10 16 10 16;
+    -fx-spacing: 10;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-color: #0f3460;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* ---- Progress bar row --------------------------------------- */
+#progressBar-row {
+    -fx-background-color: #16213e;
+    -fx-padding: 6 16 6 16;
+    -fx-spacing: 10;
+    -fx-alignment: CENTER_LEFT;
+    -fx-border-color: #0f3460;
+    -fx-border-width: 0 0 1 0;
+}
+
+/* ---- Labels ------------------------------------------------- */
+.label {
+    -fx-text-fill: #a8b2d8;
+}
+
+#status-label {
+    -fx-text-fill: #64ffda;
+    -fx-font-size: 12px;
+}
+
+/* ---- Buttons ------------------------------------------------ */
+.button {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+    -fx-background-radius: 6;
+    -fx-padding: 6 14 6 14;
+    -fx-cursor: hand;
+}
+
+.button:hover {
+    -fx-background-color: #1a4a7a;
+}
+
+.button:pressed {
+    -fx-background-color: #0a2540;
+}
+
+#open-btn {
+    -fx-background-color: #533483;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+#open-btn:hover {
+    -fx-background-color: #6b44a8;
+}
+
+#save-btn {
+    -fx-background-color: #0f7360;
+    -fx-text-fill: white;
+    -fx-font-weight: bold;
+}
+
+#save-btn:hover {
+    -fx-background-color: #14917a;
+}
+
+#save-btn:disabled {
+    -fx-opacity: 0.4;
+}
+
+/* ---- ComboBox ----------------------------------------------- */
+.combo-box {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+    -fx-background-radius: 6;
+    -fx-mark-color: #64ffda;
+}
+
+.combo-box .list-cell {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+}
+
+.combo-box-popup .list-view {
+    -fx-background-color: #16213e;
+}
+
+.combo-box-popup .list-cell:hover {
+    -fx-background-color: #1a4a7a;
+}
+
+/* ---- Slider ------------------------------------------------- */
+.slider .track {
+    -fx-background-color: #0f3460;
+}
+
+.slider .thumb {
+    -fx-background-color: #533483;
+}
+
+/* ---- Spinner ------------------------------------------------ */
+.spinner {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+}
+
+.spinner .text-field {
+    -fx-background-color: #0f3460;
+    -fx-text-fill: #e0e0e0;
+}
+
+/* ---- Progress bar ------------------------------------------ */
+.progress-bar {
+    -fx-pref-width: 300;
+    -fx-pref-height: 10;
+    -fx-background-radius: 5;
+    -fx-accent: #64ffda;
+}
+
+.progress-bar .bar {
+    -fx-background-color: linear-gradient(to right, #533483, #64ffda);
+    -fx-background-radius: 5;
+    -fx-background-insets: 0;
+}
+
+.progress-bar .track {
+    -fx-background-color: #0f3460;
+    -fx-background-radius: 5;
+}
+
+/* ---- Scroll pane ------------------------------------------- */
+.scroll-pane {
+    -fx-background-color: #1a1a2e;
+    -fx-background: #1a1a2e;
+}
+
+.scroll-pane > .viewport {
+    -fx-background-color: #1a1a2e;
+}
+
+/* ---- Separator --------------------------------------------- */
+.separator .line {
+    -fx-border-color: #0f3460;
+}

@@ -1,175 +1,208 @@
-# Async Image Processing
+# Async Image Processor
 
-A JavaFX application that processes images asynchronously using concurrent programming. The application splits images into small tiles, processes them in parallel using multiple threads, and displays the result progressively on a canvas.
+A JavaFX desktop application that processes images asynchronously using concurrent
+programming. Images are split into tiles, filtered in parallel on an adaptive thread
+pool, and rendered progressively on a canvas — tile by tile in real-time.
 
-## About
-
-This project demonstrates concurrent image processing with JavaFX. It takes an input image, divides it into small tiles, applies a grayscale filter to each tile in parallel using a thread pool, and renders the results in real-time.
-
-**Key Concepts:**
-- Concurrent processing using Java ExecutorService
-- JavaFX for GUI and canvas rendering
-- Thread-safe rendering with producer-consumer pattern
-- Modular design with filter interfaces
+---
 
 ## Features
 
-- Load images (JPG, PNG, BMP, GIF)
-- Split images into 10×10 pixel tiles
-- Process tiles in parallel (100 worker threads)
-- Progressive real-time rendering
-- Grayscale conversion filter
+| Feature | Details |
+|---|---|
+| **Filters** | Grayscale, Sepia, Invert — selectable at runtime |
+| **Tile size** | Configurable 4 – 64 px slider (default 10 px) |
+| **Thread count** | Adaptive default (`CPUs × 2`, capped at 32); adjustable spinner |
+| **Progressive rendering** | Up to 20 tiles drawn per animation frame (~60 fps) |
+| **Progress indicator** | Progress bar + tile counter (`done / total`) |
+| **Open / Save** | File chooser for input; saves processed image as PNG |
+| **Cancellation** | Opening a new image or closing the window cleanly cancels in-flight tasks |
+| **Back-pressure** | Bounded work queue with `CallerRunsPolicy` prevents memory blow-up on large images |
+
+---
+
+## Prerequisites
+
+| Requirement | Version |
+|---|---|
+| **Java** | **21** (LTS) – OpenJDK or Oracle JDK |
+| **Maven** | 3.9 + (or use the included `mvnw` wrapper) |
+| **JavaFX** | 21.0.3 – downloaded automatically by Maven |
+
+> [!NOTE]
+> The project uses the Java module system (`module-info.java`). Running with
+> Java 17 is **not** supported because the build targets `--release 21`.
+
+---
+
+## Getting Started
+
+### Clone
+
+```bash
+git clone <repository-url>
+cd Async-Image-Processing1-1
+```
+
+### Build
+
+```bash
+# Using the Maven wrapper (no Maven installation required)
+./mvnw clean install        # Linux / macOS
+mvnw.cmd clean install      # Windows
+```
+
+### Run
+
+```bash
+./mvnw javafx:run           # Linux / macOS
+mvnw.cmd javafx:run         # Windows
+```
+
+### Run Tests
+
+```bash
+./mvnw test                 # runs all 7 JUnit 5 test classes
+```
+
+---
 
 ## Project Structure
 
 ```
-src/main/java/com/image/imageprocessing/
-├── HelloApplication.java          # Main JavaFX entry point
-├── filter/
-│   ├── ImageFilter.java          # Filter interface
-│   └── GreyScaleFilter.java      # Grayscale implementation
-├── image/
-│   ├── ImageData.java            # Tile data model
-│   └── DrawMultipleImagesOnCanvas.java  # Canvas renderer
-├── io/
-│   ├── ImageReadInf.java         # I/O interface
-│   └── FileImageIO.java          # File reader
-└── processor/
-    └── ImageProcessor.java       # Concurrent processing engine
+src/
+├── main/java/com/image/imageprocessing/
+│   ├── HelloApplication.java          # JavaFX entry point + UI layout
+│   ├── filter/
+│   │   ├── ImageFilter.java           # Filter interface
+│   │   ├── GreyScaleFilter.java       # BT.709 luminosity grayscale
+│   │   ├── SepiaFilter.java           # Sepia matrix transform
+│   │   └── InvertFilter.java          # Channel inversion
+│   ├── image/
+│   │   ├── ImageData.java             # Immutable record (tile position + pixels)
+│   │   └── DrawMultipleImagesOnCanvas.java  # AnimationTimer renderer
+│   ├── io/
+│   │   ├── ImageReadInf.java          # I/O interface (readImage / saveImage)
+│   │   └── FileImageIO.java           # File-system implementation
+│   └── processor/
+│       └── ImageProcessor.java        # Adaptive thread pool, tiling, progress
+├── main/resources/com/image/imageprocessing/
+│   └── styles.css                     # Dark UI theme
+└── test/java/com/image/imageprocessing/
+    ├── filter/  GreyScaleFilterTest, SepiaFilterTest, InvertFilterTest
+    ├── image/   ImageDataTest
+    ├── io/      FileImageIOTest
+    └── processor/ TilingLogicTest, ImageProcessorTest
 ```
 
-## Prerequisites
+---
 
-- Java 17 or higher
-- Maven 3.6+
+## Architecture
 
-## Getting Started
+```
+┌─────────────────────────────────────────────┐
+│             HelloApplication (JavaFX UI)     │
+│  Controls: filter, tile size, thread count  │
+│  Progress bar + Open / Save buttons         │
+└────────┬─────────────────────────┬──────────┘
+         │ readImage(Path)         │ addImageToQueue(ImageData)
+         ▼                         ▼
+  ┌────────────┐          ┌──────────────────────────┐
+  │ FileImageIO│          │ DrawMultipleImagesOnCanvas│
+  └────────────┘          │  AnimationTimer (20/frame)│
+                          └──────────────────────────┘
+         │                          ▲
+         │ processImage(...)        │ Consumer<ImageData>
+         ▼                         │
+  ┌──────────────────────────────────────────┐
+  │           ImageProcessor                 │
+  │  ThreadPoolExecutor (adaptive, max 32)   │
+  │  ArrayBlockingQueue (4 000, CallerRuns)  │
+  │  AtomicInteger progress + CompletableFuture│
+  └──────────┬───────────────────────────────┘
+             │ filter.filter(subImage)
+             ▼
+  ┌──────────────────┐
+  │  ImageFilter impl│  (GreyScaleFilter / SepiaFilter / InvertFilter)
+  └──────────────────┘
+```
 
-### 1. Clone the Repository
+---
+
+## How to Add a New Filter
+
+1. **Create the class** in `src/main/java/com/image/imageprocessing/filter/`:
+
+   ```java
+   package com.image.imageprocessing.filter;
+
+   import java.awt.image.BufferedImage;
+
+   public class BlurFilter implements ImageFilter {
+       @Override
+       public BufferedImage filter(BufferedImage original) {
+           // … your per-pixel logic …
+           return result;
+       }
+
+       @Override
+       public String toString() { return "Blur"; }
+   }
+   ```
+
+2. **Register it** in `HelloApplication.buildFilter()`:
+
+   ```java
+   case "Blur" -> new BlurFilter();
+   ```
+
+3. **Add it to the combo-box** in `HelloApplication.buildToolbar()`:
+
+   ```java
+   filterCombo.getItems().addAll("Grayscale", "Sepia", "Invert", "Blur");
+   ```
+
+4. **Write a test** in `src/test/java/…/filter/BlurFilterTest.java`.
+
+---
+
+## Running Tests
 
 ```bash
-git clone <repository-url>
-cd Async-Image-Processing1
+mvnw.cmd test        # Windows
+./mvnw test          # Linux / macOS
 ```
 
-### 2. Build the Project
+Expected output:
 
-Using the Maven wrapper (recommended):
-```bash
-mvnw clean install
+```
+[INFO] Tests run: 18, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS
 ```
 
-Or if you have Maven installed:
-```bash
-mvn clean install
-```
 
-### 3. Run the Application
 
-Using Maven wrapper:
-```bash
-mvnw javafx:run
-```
+---
 
-Or with Maven:
-```bash
-mvn javafx:run
-```
+## Technologies
 
-### 4. Use the Application
+| Library | Version | Purpose |
+|---|---|---|
+| Java | 21 | Language + module system |
+| JavaFX | 21.0.3 | GUI, Canvas, AnimationTimer |
+| `javax.imageio` | JDK built-in | Image read / write |
+| `java.util.concurrent` | JDK built-in | ThreadPoolExecutor, CompletableFuture |
+| `java.util.logging` | JDK built-in | Structured logging |
+| JUnit Jupiter | 5.10.2 | Unit tests |
 
-1. When the application starts, a file chooser dialog will appear
-2. Select an image file (JPG, PNG, BMP, or GIF)
-3. Watch as the image is processed tile-by-tile and converted to grayscale
-4. Close the window when finished
-
-## How It Works
-
-1. **Image Loading**: User selects an image via file dialog
-2. **Tile Splitting**: Image is divided into 10×10 pixel tiles
-3. **Parallel Processing**: Each tile is submitted to a thread pool of 100 workers
-4. **Filter Application**: Grayscale filter is applied to each tile independently
-5. **Progressive Rendering**: Processed tiles are displayed as they complete using JavaFX AnimationTimer
-6. **Display**: Final grayscale image is rendered on the canvas
-
-## Technologies Used
-
-- **Java 17** - Core programming language with module system
-- **JavaFX 17.0.6** - GUI framework for user interface and canvas
-- **Maven** - Build tool and dependency management
-- **ExecutorService** - Java concurrency for thread pool management
-- **LinkedBlockingQueue** - Thread-safe queue for the producer-consumer pattern
+---
 
 ## Contributing
 
-Contributions are welcome! Here's how you can contribute to this project:
-
-### Steps to Contribute
-
-1. **Fork the repository**
-   - Click the 'Fork' button on GitHub
-
-2. **Clone your fork**
-   ```bash
-   git clone https://github.com/your-username/Async-Image-Processing1.git
-   cd Async-Image-Processing1
-   ```
-
-3. **Create a new branch**
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
-
-4. **Make your changes**
-   - Write clean, readable code
-   - Follow existing code style
-   - Test your changes
-
-5. **Commit your changes**
-   ```bash
-   git add .
-   git commit -m "Add: brief description of your changes"
-   ```
-
-6. **Push to your fork**
-   ```bash
-   git push origin feature/your-feature-name
-   ```
-
-7. **Create a Pull Request**
-   - Go to the original repository on GitHub
-   - Click "New Pull Request"
-   - Select your fork and branch
-   - Provide a clear description of your changes
-
-### Contribution Ideas
-
-Here are some ways you can contribute:
-
-- **Add new image filters** (blur, sharpen, sepia, edge detection)
-- **Implement save functionality** to export processed images
-- **Improve performance** (optimize thread pool size, adaptive tiling)
-- **Add UI controls** (progress bar, filter selection dropdown)
-- **Write unit tests** for filters and core components
-- **Improve error handling** and user feedback
-- **Add documentation** and code comments
-- **Fix bugs** reported in issues
-
-### Code Guidelines
-
-- Use meaningful variable and method names
-- Follow Java naming conventions (camelCase for methods, PascalCase for classes)
-- Add comments for complex logic
-- Keep methods small and focused
-- Handle exceptions appropriately
-
-## License
-
-This project is available for educational and personal use.
-
-## Contact
-
-For questions, suggestions, or issues, please open an issue on GitHub.
+1. Fork → branch (`git checkout -b feature/my-filter`) → commit → PR.
+2. Follow the **How to Add a New Filter** guide above.
+3. All tests must pass (`mvnw test`) before opening a PR.
+4. Use `java.util.logging.Logger` — do not add `System.out/err` calls.
 
 ---
 

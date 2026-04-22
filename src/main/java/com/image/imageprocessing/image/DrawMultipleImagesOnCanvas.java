@@ -1,59 +1,74 @@
 package com.image.imageprocessing.image;
 
 import javafx.animation.AnimationTimer;
-import javafx.application.Platform;
 import javafx.embed.swing.SwingFXUtils;
-import javafx.scene.Group;
-import javafx.scene.Scene;
 import javafx.scene.canvas.Canvas;
 import javafx.scene.canvas.GraphicsContext;
-import javafx.scene.layout.StackPane;
-import javafx.stage.Stage;
 
-import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.logging.Logger;
 
 public class DrawMultipleImagesOnCanvas {
 
-    private static DrawMultipleImagesOnCanvas instance;
-    private Queue<ImageData> queue = new LinkedBlockingQueue<>();
-    private GraphicsContext gc;
+    private static final Logger LOG =
+            Logger.getLogger(DrawMultipleImagesOnCanvas.class.getName());
 
-    public static DrawMultipleImagesOnCanvas getInstance(){
-        if(instance == null){
-            instance = new DrawMultipleImagesOnCanvas();
+    private static final int MAX_TILES_PER_FRAME = 20;
+    private static final int QUEUE_CAPACITY = 8000;
+
+    private final Canvas canvas;
+    private final GraphicsContext gc;
+    private final LinkedBlockingQueue<ImageData> queue =
+            new LinkedBlockingQueue<>(QUEUE_CAPACITY);
+
+    private final double scale;
+
+    private AnimationTimer timer;
+
+    public DrawMultipleImagesOnCanvas(Canvas canvas, double scale) {
+        this.canvas = canvas;
+        this.gc     = canvas.getGraphicsContext2D();
+        this.scale  = scale;
+    }
+
+    public Canvas getCanvas() {
+        return canvas;
+    }
+
+    public void addImageToQueue(ImageData data) {
+        if (!queue.offer(data)) {
+            LOG.warning(String.format(
+                    "Render queue full – dropping tile at (%d, %d)",
+                    data.tileX(), data.tileY()));
         }
-        return instance;
     }
 
-    public void addImageToQueue(ImageData image){
-        queue.offer(image);
-    }
-
-    public void initialize(Stage primaryStage, int width, int height){
-        Canvas canvas = new Canvas(width, height);
-        this.gc = canvas.getGraphicsContext2D();
-        this.gc.clearRect(0, 0, width, height);
-
-        new AnimationTimer() {
+    public void start() {
+        gc.clearRect(0, 0, canvas.getWidth(), canvas.getHeight());
+        timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                ImageData imageData = queue.poll();
-                if(imageData != null){
-                    gc.drawImage(SwingFXUtils.toFXImage(imageData.getImage(), null),
-                            imageData.getI(), imageData.getJ(), 
-                            imageData.getX(), imageData.getY());
-                    System.out.println("Drawing using thread " + Thread.currentThread().getName());
-                    System.out.println(String.format("Drawing image at i: %s, j: %s", 
-                            imageData.getI(), imageData.getJ()));
+                int drawn = 0;
+                ImageData data;
+                while (drawn < MAX_TILES_PER_FRAME && (data = queue.poll()) != null) {
+                    gc.drawImage(
+                            SwingFXUtils.toFXImage(data.image(), null),
+                            data.tileX()      * scale,
+                            data.tileY()      * scale,
+                            data.tileWidth()  * scale,
+                            data.tileHeight() * scale);
+                    drawn++;
                 }
             }
-        }.start();
+        };
+        timer.start();
+    }
 
-        StackPane stack = new StackPane(canvas);
-        Scene scene = new Scene(stack, width, height);
-        primaryStage.setScene(scene);
-        primaryStage.setTitle("Async Image Processing");
-        primaryStage.show();
+    public void stop() {
+        if (timer != null) {
+            timer.stop();
+            timer = null;
+        }
+        queue.clear();
     }
 }

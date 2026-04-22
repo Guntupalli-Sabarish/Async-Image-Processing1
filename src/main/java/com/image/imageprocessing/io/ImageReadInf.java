@@ -1,11 +1,12 @@
 package com.image.imageprocessing.io;
 
 import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.file.Path;
 
 public interface ImageReadInf {
 
-     <T> BufferedImage readImage(T src);
+    BufferedImage readImage(Path src) throws IOException;
 
-     void sendImage(BufferedImage image);
-
+    void saveImage(BufferedImage image, Path dest) throws IOException;
 }
