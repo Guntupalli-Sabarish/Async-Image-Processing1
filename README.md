@@ -26,8 +26,9 @@ pool, and rendered progressively on a canvas — tile by tile in real-time.
 | Requirement | Version |
 |---|---|
 | **Java** | **21** (LTS) – OpenJDK or Oracle JDK |
-| **Maven** | 3.9 + (or use the included `mvnw` wrapper) |
+| **Maven** | 3.9 + (must be installed and on PATH) |
 | **JavaFX** | 21.0.3 – downloaded automatically by Maven |
+| **JAVA_HOME** | Must be set to your JDK 21 path (e.g. `C:\Program Files\Java\jdk-21`) |
 
 > [!NOTE]
 > The project uses the Java module system (`module-info.java`). Running with
@@ -47,22 +48,19 @@ cd Async-Image-Processing1-1
 ### Build
 
 ```bash
-# Using the Maven wrapper (no Maven installation required)
-./mvnw clean install        # Linux / macOS
-mvnw.cmd clean install      # Windows
+mvn clean install
 ```
 
 ### Run
 
 ```bash
-./mvnw javafx:run           # Linux / macOS
-mvnw.cmd javafx:run         # Windows
+mvn javafx:run
 ```
 
 ### Run Tests
 
 ```bash
-./mvnw test                 # runs all 7 JUnit 5 test classes
+mvn test
 ```
 
 ---
