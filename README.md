@@ -1,4 +1,4 @@
-# Async Image Processor
+#ParallelPix
 
 A JavaFX desktop application that processes images asynchronously using concurrent
 programming. Images are split into tiles, filtered in parallel on an adaptive thread
